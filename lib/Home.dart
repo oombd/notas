@@ -1,36 +1,39 @@
 import 'package:flutter/material.dart';
 
+import 'helper/AnotacaoHelper.dart';
+import 'model/Anotacao.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
-
   @override
-  State<Home> createState() => _HomeState();
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
 
-  TextEditingController _notaTitleController = TextEditingController();
-  TextEditingController _notaController = TextEditingController();
+  TextEditingController _tituloController = TextEditingController();
+  TextEditingController _descricaoController = TextEditingController();
 
-  _exibirTelaCadastro() {
+  var _db = AnotacaoHelper();
+
+  _exibirTelaCadastro(){
+
     showDialog(
         context: context,
-        builder: (context) {
+        builder: (context){
           return AlertDialog(
+            title: const Text("Adicionar nota"),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 TextField(
-                  controller: _notaTitleController,
+                  controller: _tituloController,
                   autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: "Título"
+                  decoration: const InputDecoration(
+                      hintText: "Título"
                   ),
                 ),
                 TextField(
-                  controller: _notaController,
-                  autofocus: true,
+                  controller: _descricaoController,
                   decoration: const InputDecoration(
                       hintText: "Nota"
                   ),
@@ -43,35 +46,49 @@ class _HomeState extends State<Home> {
                   child: const Text("Cancelar")
               ),
               TextButton(
-                  onPressed: () {
+                  onPressed: (){
+
+                    //salvar
+                    _salvarAnotacao();
 
                     Navigator.pop(context);
                   },
                   child: const Text("Salvar")
-              ),
+              )
             ],
           );
         }
     );
   }
+
+  _salvarAnotacao() async {
+    String titulo = _tituloController.text;
+    String descricao = _descricaoController.text;
+
+    Anotacao anotacao = Anotacao(titulo, descricao, DateTime.now().toString() );
+    int resultado = await _db.salvarAnotacao( anotacao );
+    print("salvar anotacao: " + resultado.toString() );
+
+    _tituloController.clear();
+    _descricaoController.clear();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: Text("NOTAS"),
+        title: const Text("Notas"),
         backgroundColor: Colors.black,
       ),
-      body: Container(
-
-      ),
+      body: Container(),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-        onPressed: (){
-          _exibirTelaCadastro();
-        },
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add),
+          onPressed: (){
+            _exibirTelaCadastro();
+          }
       ),
     );
   }
